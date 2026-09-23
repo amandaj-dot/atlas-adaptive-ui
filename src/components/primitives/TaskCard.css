@@ -1,0 +1,75 @@
+/*
+ * Editorial column, not a card: no background fill, no border box, no
+ * shadow — separation between the three tasks comes from a hairline
+ * rule (see SpecRenderer.css, which adds a left rule between adjacent
+ * TaskCard columns) and whitespace, not container chrome. Urgency is a
+ * plain text-color shift to the restrained recover red, not a colored
+ * badge.
+ */
+.task-card {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+  height: 100%;
+  padding-top: var(--space-md);
+  border-top: 1px solid var(--color-border);
+}
+
+.task-card__title {
+  margin: 0;
+  font-weight: 500;
+  font-size: 1rem;
+  color: var(--color-ink);
+}
+
+.task-card__description {
+  margin: 0;
+  font-size: 0.85rem;
+  font-weight: 400;
+  line-height: 1.5;
+  color: var(--color-ink-secondary);
+}
+
+.task-card__footer {
+  margin-top: auto;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+  align-items: flex-start;
+}
+
+.task-card__status {
+  font-size: 0.68rem;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--color-ink-secondary);
+}
+
+.task-card--urgent .task-card__status {
+  color: var(--color-recover);
+}
+
+.task-card__complete {
+  font-family: var(--font-sans);
+  font-size: 0.78rem;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--color-ink);
+  background: #FFFFFF;
+  border: 1px solid var(--color-ink);
+  border-radius: 0;
+  padding: 16px 32px;
+  cursor: pointer;
+  transition: background-color 0.15s ease, color 0.15s ease;
+}
+
+.task-card__complete span {
+  display: inline-block;
+}
+
+.task-card__complete:hover {
+  background: var(--color-ink);
+  color: #FFFFFF;
+}

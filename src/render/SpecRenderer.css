@@ -1,0 +1,108 @@
+/*
+ * Flex row + wrap, with each section defaulting to full width (100%
+ * basis), which reproduces plain vertical stacking for most content.
+ * TaskCard and DetailCard sections get a narrower basis instead, so
+ * when several appear consecutively (as they do in Planning and Ready)
+ * they cluster into an editorial multi-column row — using the
+ * data-component attribute the renderer already attaches, no extra
+ * grouping markup needed. A hairline rule (not a gap/shadow) separates
+ * adjacent columns, consistent with "extremely restrained containers".
+ */
+.spec-renderer {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  column-gap: var(--space-xl);
+  row-gap: var(--space-md);
+}
+
+.spec-section {
+  display: block;
+  flex: 1 1 100%;
+}
+
+.spec-section[data-component="TaskCard"],
+.spec-section[data-component="DetailCard"] {
+  flex: 0 1 240px;
+  min-width: 220px;
+}
+
+/* Grow back in specifically for the cases where several of these sit
+   together and should balance evenly across the row: Planning's
+   3-column task cluster, and every state's Flight/Hotel pair
+   (Planning, Ready, and now Disruption, which also shows both side by
+   side below its hero). */
+.spec-renderer[data-state="planning"] .spec-section[data-component="TaskCard"] {
+  flex-grow: 1;
+}
+
+.spec-renderer .spec-section[data-component="DetailCard"] {
+  flex-grow: 1;
+}
+
+.spec-section[data-component="TaskCard"] + .spec-section[data-component="TaskCard"],
+.spec-section[data-component="DetailCard"] + .spec-section[data-component="DetailCard"] {
+  border-left: 1px solid var(--color-border);
+  padding-left: var(--space-xl);
+}
+
+/* Nested inside its section's own box (see SpecRenderer.tsx) — stacked
+   directly below whatever the section's component rendered, so it
+   visually belongs to that content regardless of the section's row
+   width. Used for FlightStatusControl beneath flight-detail. */
+.spec-inline-slot {
+  margin-top: var(--space-sm);
+}
+
+.spec-renderer__error {
+  background: var(--color-surface);
+  border: 1px solid var(--color-recover);
+  color: var(--color-recover);
+  padding: var(--space-md);
+  font-family: var(--font-sans);
+  font-size: 0.85rem;
+}
+
+.spec-renderer__error-title {
+  font-weight: 500;
+  margin: 0 0 var(--space-xs) 0;
+}
+
+/* At intermediate widths the third task wraps. Keep its column width and
+   align it with the first card rather than stretching and retaining the
+   border intended for adjacent columns. */
+@media (max-width: 860px) and (min-width: 721px) {
+  .spec-renderer[data-state="planning"] .spec-section[data-component="TaskCard"],
+  .spec-renderer[data-state="disruption"] .spec-section[data-component="TaskCard"] {
+    flex: 0 0 calc((100% - var(--space-xl)) / 2);
+    min-width: 0;
+  }
+
+  .spec-renderer .spec-section[data-component="TaskCard"][data-section-id="currency-prep"] {
+    border-left: 0;
+    padding-left: 0;
+  }
+}
+
+@media (max-width: 720px) {
+  .spec-renderer .spec-section[data-component="DetailCard"] {
+    flex: 0 0 100%;
+    min-width: 0;
+  }
+
+  .spec-renderer .spec-section[data-component="DetailCard"] + .spec-section[data-component="DetailCard"] {
+    border-left: 0;
+    padding-left: 0;
+  }
+
+  .spec-renderer[data-state="planning"] .spec-section[data-component="TaskCard"],
+  .spec-renderer[data-state="disruption"] .spec-section[data-component="TaskCard"] {
+    flex: 0 0 100%;
+    min-width: 0;
+  }
+
+  .spec-renderer .spec-section[data-component="TaskCard"] + .spec-section[data-component="TaskCard"] {
+    border-left: 0;
+    padding-left: 0;
+  }
+}

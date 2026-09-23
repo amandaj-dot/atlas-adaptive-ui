@@ -1,0 +1,65 @@
+.demo-action-panel {
+  margin-top: 1.5rem;
+  padding: 1.5rem;
+  border: 1px solid var(--color-border);
+  background: #f6f7f8;
+  color: var(--color-ink);
+  max-width: 700px;
+}
+
+.demo-action-panel__header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 1rem;
+}
+
+.demo-action-panel h3 {
+  margin: 0 0 0.75rem;
+  font-size: 1.1rem;
+  font-weight: 600;
+}
+
+.demo-action-panel p,
+.demo-action-panel li,
+.demo-action-panel dd,
+.demo-action-panel dt {
+  font-size: 0.9rem;
+  line-height: 1.5;
+}
+
+.demo-action-panel p:last-child,
+.demo-action-panel ol:last-child,
+.demo-action-panel dl:last-child {
+  margin-bottom: 0;
+}
+
+.demo-action-panel__header button {
+  border: 0;
+  padding: 0;
+  background: none;
+  color: var(--color-ink);
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+.demo-action-panel__summary {
+  padding-left: 1rem;
+  border-left: 2px solid var(--color-ink);
+}
+
+.demo-action-panel dl div {
+  display: flex;
+  gap: 1rem;
+  border-top: 1px solid var(--color-border);
+  padding: 0.5rem 0;
+}
+
+.demo-action-panel dt {
+  min-width: 7rem;
+  color: var(--color-ink-secondary);
+}
+
+.demo-action-panel dd {
+  margin: 0;
+}

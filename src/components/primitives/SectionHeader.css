@@ -1,0 +1,79 @@
+/*
+ * Two visual registers, driven by the section id the renderer attaches
+ * (no prop/schema change):
+ *   - "header" / "trip-context": the hero moment — light-weight display
+ *     type at real scale, Helvetica Neue Light. Hierarchy comes from
+ *     scale and weight, not a second typeface.
+ *   - anything else: a quiet section break — a tracked uppercase
+ *     micro-label with a hairline rule above it.
+ */
+
+.section-header {
+  margin: var(--space-md) 0 var(--space-xs) 0;
+  padding-top: var(--space-sm);
+  border-top: 1px solid var(--color-border);
+}
+
+.section-header__title {
+  margin: 0;
+  font-family: var(--font-sans);
+  font-size: 0.72rem;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: var(--color-ink-secondary);
+}
+
+.section-header__subtitle {
+  margin: var(--space-xs) 0 0 0;
+  font-size: 0.9rem;
+  font-weight: 400;
+  color: var(--color-ink-secondary);
+}
+
+/* Hero — the state's headline, sitting on the destination canvas */
+.spec-section[data-section-id="header"] .section-header {
+  margin: 0;
+  padding-top: 0;
+  border-top: none;
+}
+
+.spec-section[data-section-id="header"] .section-header__title {
+  font-family: var(--font-sans);
+  font-size: 2.75rem;
+  font-weight: 300;
+  text-transform: none;
+  letter-spacing: -0.01em;
+  line-height: 1.1;
+  color: var(--color-ink);
+}
+
+.spec-section[data-section-id="header"] .section-header__subtitle {
+  margin-top: var(--space-sm);
+  font-size: 0.95rem;
+  font-weight: 400;
+  letter-spacing: 0.02em;
+  color: var(--color-ink-secondary);
+}
+
+/* Trip context (Ready/Disruption) — small tracked eyebrow */
+.spec-section[data-section-id="trip-context"] .section-header {
+  margin: 0;
+  padding-top: 0;
+  border-top: none;
+}
+
+.spec-section[data-section-id="trip-context"] .section-header__title {
+  font-family: var(--font-sans);
+  font-size: 0.72rem;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  color: var(--color-ink-secondary);
+}
+
+@media (max-width: 720px) {
+  .spec-section[data-section-id="header"] .section-header__title {
+    font-size: 2rem;
+  }
+}

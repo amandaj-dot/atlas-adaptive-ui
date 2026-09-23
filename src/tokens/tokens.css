@@ -1,0 +1,57 @@
+/* Design tokens — CSS custom properties mirroring tokens.ts */
+
+:root {
+  --color-bg: #FFFFFF;
+  --color-surface: #FFFFFF;
+  --color-ink: #111111;
+  /* customer-facing secondary text — near-black, not gray */
+  --color-ink-secondary: #3A3A3A;
+  /* hairlines / System Inspector dev-tool styling only */
+  --color-ink-muted: #6B6B6B;
+  --color-border: #E2E2E0;
+  --color-line: #D8D8D5;
+
+  /* the one restrained semantic color, reserved for Disruption */
+  --color-recover: #8A2A22;
+
+  /* System Inspector's own surface only — never used by customer-facing
+     components — deliberately distinct from pure white. */
+  --color-surface-inspector: #FAFAFA;
+
+  /* type */
+  --font-sans: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  /* Used only by System Inspector / dev tooling, to keep it visually
+     distinct from the customer-facing Helvetica Neue experience. */
+  --font-mono: 'JetBrains Mono', ui-monospace, 'SF Mono', Menlo, monospace;
+
+  /* spacing */
+  --space-xs: 4px;
+  --space-sm: 8px;
+  --space-md: 16px;
+  --space-lg: 24px;
+  --space-xl: 32px;
+  --space-xxl: 48px;
+  --space-xxxl: 64px;
+
+  /* radius — customer-facing surfaces stay square; System Inspector
+     keeps a small radius for its own utilitarian aesthetic. */
+  --radius-sm: 2px;
+  --radius-md: 6px;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  background: var(--color-bg);
+  color: var(--color-ink);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+}
+
+:focus-visible {
+  outline: 2px solid var(--color-ink);
+  outline-offset: 2px;
+}

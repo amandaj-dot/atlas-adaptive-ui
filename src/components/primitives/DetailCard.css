@@ -1,0 +1,43 @@
+/*
+ * Reference information as typography, not a card: no background,
+ * border box, or shadow — a hairline top rule and generous whitespace
+ * carry the separation, consistent with TaskCard's treatment so the two
+ * read as the same visual language.
+ */
+.detail-card {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+  height: 100%;
+  padding-top: var(--space-md);
+  border-top: 1px solid var(--color-border);
+}
+
+.detail-card__label {
+  font-size: 0.68rem;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: var(--color-ink-secondary);
+}
+
+.detail-card__content {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  text-align: left;
+}
+
+.detail-card__primary {
+  font-weight: 400;
+  font-size: 1.35rem;
+  letter-spacing: -0.005em;
+  color: var(--color-ink);
+}
+
+.detail-card__secondary {
+  font-size: 0.85rem;
+  font-weight: 400;
+  color: var(--color-ink-secondary);
+  margin-top: var(--space-xs);
+}

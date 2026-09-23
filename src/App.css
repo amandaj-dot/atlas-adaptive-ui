@@ -1,0 +1,526 @@
+.app {
+  min-height: 100vh;
+  background: var(--color-bg);
+}
+
+/* ---------- Global header ---------- */
+
+.shell {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-md);
+  flex-wrap: wrap;
+  background: #000000;
+  padding: var(--space-md) var(--space-xl);
+}
+
+.shell__label {
+  margin: 0;
+  font-size: 0.7rem;
+  font-weight: 400;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: #ffffff;
+}
+
+.shell__replay {
+  border: 1px solid rgba(255, 255, 255, 0.55);
+  border-radius: 0;
+  background: none;
+  color: #ffffff;
+  padding: 0.4rem 0.6rem;
+  font-family: var(--font-mono);
+  font-size: 0.62rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  cursor: pointer;
+}
+
+.shell__replay:hover {
+  background: #ffffff;
+  color: #000000;
+}
+
+/* ---------- The adaptive model, before the live demo ---------- */
+
+.logic-intro {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: var(--space-lg) var(--space-xl);
+  color: var(--color-ink);
+}
+
+.logic-intro__header {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--space-md);
+}
+
+.logic-intro__header h2 {
+  margin: 0 0 var(--space-xs);
+  font-size: 1rem;
+  font-weight: 600;
+  line-height: 1.35;
+}
+
+.logic-intro__toggle {
+  flex: none;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--color-ink-secondary);
+  font-family: var(--font-mono);
+  font-size: 0.64rem;
+  letter-spacing: 0.04em;
+  text-decoration: underline;
+  text-underline-offset: 0.2em;
+  text-transform: uppercase;
+  cursor: pointer;
+}
+
+.logic-intro__toggle:hover,
+.logic-intro__toggle:focus-visible {
+  color: var(--color-ink);
+}
+
+.logic-intro__copy p {
+  max-width: 76ch;
+  margin: 0;
+  color: var(--color-ink-muted);
+  font-size: 0.82rem;
+  line-height: 1.5;
+}
+
+.logic-intro__model {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  margin-top: var(--space-md);
+  border-top: 1px solid var(--color-border);
+}
+
+.logic-intro__stage {
+  position: relative;
+  padding: var(--space-sm) var(--space-lg) 0 0;
+}
+
+.logic-intro__stage + .logic-intro__stage {
+  padding-left: var(--space-lg);
+  border-left: 1px solid var(--color-border);
+}
+
+.logic-intro__stage + .logic-intro__stage::before {
+  content: "→";
+  position: absolute;
+  left: -0.48em;
+  top: 0.55em;
+  padding: 0 0.15em;
+  background: var(--color-bg);
+  color: var(--color-ink-muted);
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+}
+
+.logic-intro__stage h3 {
+  margin: 0 0 0.2rem;
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.logic-intro__stage p {
+  margin: 0;
+  color: var(--color-ink-muted);
+  font-size: 0.75rem;
+  line-height: 1.4;
+}
+
+.context-feedback {
+  position: fixed;
+  bottom: var(--space-md);
+  left: var(--space-md);
+  z-index: 350;
+  max-width: min(480px, calc(100vw - 2rem));
+  margin: 0;
+  padding: var(--space-sm) var(--space-md);
+  border: 1px solid var(--color-border);
+  background: #ffffff;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
+  font-family: var(--font-mono);
+  font-size: 0.65rem;
+  line-height: 1.45;
+}
+
+.context-feedback span {
+  display: block;
+  margin-bottom: 0.2rem;
+  color: var(--color-ink-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+@media (max-width: 600px) {
+  .context-feedback { top: var(--space-sm); bottom: auto; }
+  .logic-intro {
+    padding: var(--space-md) var(--space-xl);
+  }
+
+  .logic-intro__header {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: var(--space-xs);
+  }
+
+  .logic-intro__model {
+    grid-template-columns: 1fr;
+    gap: var(--space-sm);
+  }
+
+  .logic-intro__stage,
+  .logic-intro__stage + .logic-intro__stage {
+    padding: 0 0 0 var(--space-md);
+    border-left: 1px solid var(--color-border);
+  }
+
+  .logic-intro__stage + .logic-intro__stage::before {
+    content: "↓";
+    left: -0.48em;
+    top: -0.85em;
+  }
+}
+
+/* ---------- Hero stack ---------- */
+
+/*
+ * All three states now use the SAME grid-overlay technique: canvas and
+ * content occupy the same grid cell (grid-area: 1/1). Every section
+ * meant to sit ON the photograph is given a min-height, summing to that
+ * state's canvas height, each bottom-anchoring its own content via
+ * flex — so everything after them starts precisely at the canvas's
+ * bottom edge regardless of exactly how tall any individual block
+ * renders. The flight-status simulator is nested INSIDE flight-detail's
+ * own box (see SpecRenderer.tsx) rather than reserved separately, so it
+ * automatically shares flight-detail's reservation.
+ *
+ * Planning: header 300px (destination) + flight/hotel row 200px
+ * (flight + nested simulator, alongside hotel) = 500px.
+ *
+ * Ready: trip-context 44px + header 250px + flight/hotel row 206px = 500px.
+ *
+ * Disruption: trip-context 44px + banner 216px = 260px. Content below
+ * the hero (flight, hotel, actions, other preparation) is plain white,
+ * normal flow, no overlap.
+ */
+.hero-stack[data-state="planning"],
+.hero-stack[data-state="ready"],
+.hero-stack[data-state="disruption"] {
+  display: grid;
+}
+
+.hero-stack[data-state="planning"] > *,
+.hero-stack[data-state="ready"] > *,
+.hero-stack[data-state="disruption"] > * {
+  grid-area: 1 / 1;
+}
+
+.hero-stack[data-state="planning"] .hero-stack__canvas,
+.hero-stack[data-state="ready"] .hero-stack__canvas,
+.hero-stack[data-state="disruption"] .hero-stack__canvas {
+  align-self: start;
+}
+
+.hero-stack__content {
+  position: relative;
+  z-index: 1;
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 0 var(--space-xl) var(--space-xxxl);
+}
+
+/* Planning: destination (upper reserved zone) */
+.hero-stack[data-state="planning"] .spec-section[data-section-id="header"] {
+  min-height: 300px;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  padding-bottom: var(--space-lg);
+}
+
+/* Planning: Flight (+ nested simulator) and Hotel share one reserved
+   band, side by side, both bottom-anchored. */
+.hero-stack[data-state="planning"] .spec-section[data-section-id="flight-detail"],
+.hero-stack[data-state="planning"] .spec-section[data-section-id="hotel-detail"] {
+  min-height: 200px;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  padding-bottom: var(--space-xl);
+}
+
+/* Ready: trip-context + header */
+.hero-stack[data-state="ready"] .spec-section[data-section-id="trip-context"] {
+  min-height: 44px;
+  display: flex;
+  align-items: flex-end;
+  padding-bottom: var(--space-xs);
+}
+
+.hero-stack[data-state="ready"] .spec-section[data-section-id="header"] {
+  min-height: 250px;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  padding-bottom: var(--space-xl);
+}
+
+/* Ready: Flight (+ nested simulator) and Hotel share one reserved band.
+   padding-bottom increased slightly over the base zone to give the
+   nested simulator a bit more clearance from the image's bottom edge. */
+.hero-stack[data-state="ready"] .spec-section[data-section-id="flight-detail"],
+.hero-stack[data-state="ready"] .spec-section[data-section-id="hotel-detail"] {
+  min-height: 206px;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  padding-bottom: var(--space-xl);
+}
+
+/* Keep the hotel divider as a fine hairline over the destination image. */
+.hero-stack[data-state="planning"] .spec-section[data-section-id="hotel-detail"],
+.hero-stack[data-state="ready"] .spec-section[data-section-id="hotel-detail"] {
+  border-left: 0.5px solid rgba(255, 255, 255, 0.38);
+}
+
+/* Disruption: trip-context + cancellation Banner, on the shorter hero */
+.hero-stack[data-state="disruption"] .spec-section[data-section-id="trip-context"] {
+  min-height: 44px;
+  display: flex;
+  align-items: flex-end;
+  padding-bottom: var(--space-xs);
+}
+
+.hero-stack[data-state="disruption"] .spec-section[data-section-id="disruption-banner"] {
+  min-height: 216px;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  padding-bottom: var(--space-lg);
+}
+
+.hero-stack[data-state="planning"] .spec-section[data-section-id="header"] .section-header__title,
+.hero-stack[data-state="ready"] .spec-section[data-section-id="header"] .section-header__title {
+  color: #ffffff;
+}
+
+.hero-stack[data-state="planning"] .spec-section[data-section-id="header"] .section-header__subtitle,
+.hero-stack[data-state="ready"] .spec-section[data-section-id="header"] .section-header__subtitle {
+  color: rgba(255, 255, 255, 0.82);
+}
+
+.hero-stack[data-state="ready"] .spec-section[data-section-id="trip-context"] .section-header__title,
+.hero-stack[data-state="disruption"] .spec-section[data-section-id="trip-context"] .section-header__title {
+  color: rgba(255, 255, 255, 0.82);
+}
+
+/* Disruption's cancellation message, composed onto the hero — white
+   title, the existing restrained recovery-red rule stays as the one
+   accent color against the photograph. */
+.hero-stack[data-state="disruption"] .spec-section[data-section-id="disruption-banner"] .banner__title {
+  color: #ffffff;
+}
+
+.hero-stack[data-state="disruption"] .spec-section[data-section-id="disruption-banner"] .banner__message {
+  color: rgba(255, 255, 255, 0.85);
+}
+
+/* Flight/Hotel composed onto the photograph (Planning, Ready) — white
+   typography, translucent white hairline. No card, no box, no fill —
+   editorial information placed directly on the image. */
+.hero-stack[data-state="planning"] .spec-section[data-section-id="flight-detail"] .detail-card,
+.hero-stack[data-state="planning"] .spec-section[data-section-id="hotel-detail"] .detail-card,
+.hero-stack[data-state="ready"] .spec-section[data-section-id="flight-detail"] .detail-card,
+.hero-stack[data-state="ready"] .spec-section[data-section-id="hotel-detail"] .detail-card {
+  border-top-color: rgba(255, 255, 255, 0.4);
+}
+
+.hero-stack[data-state="planning"] .spec-section[data-section-id="flight-detail"] .detail-card__label,
+.hero-stack[data-state="planning"] .spec-section[data-section-id="flight-detail"] .detail-card__secondary,
+.hero-stack[data-state="planning"] .spec-section[data-section-id="hotel-detail"] .detail-card__label,
+.hero-stack[data-state="planning"] .spec-section[data-section-id="hotel-detail"] .detail-card__secondary,
+.hero-stack[data-state="ready"] .spec-section[data-section-id="flight-detail"] .detail-card__label,
+.hero-stack[data-state="ready"] .spec-section[data-section-id="flight-detail"] .detail-card__secondary,
+.hero-stack[data-state="ready"] .spec-section[data-section-id="hotel-detail"] .detail-card__label,
+.hero-stack[data-state="ready"] .spec-section[data-section-id="hotel-detail"] .detail-card__secondary {
+  color: rgba(255, 255, 255, 0.75);
+}
+
+.hero-stack[data-state="planning"] .spec-section[data-section-id="flight-detail"] .detail-card__primary,
+.hero-stack[data-state="planning"] .spec-section[data-section-id="hotel-detail"] .detail-card__primary,
+.hero-stack[data-state="ready"] .spec-section[data-section-id="flight-detail"] .detail-card__primary,
+.hero-stack[data-state="ready"] .spec-section[data-section-id="hotel-detail"] .detail-card__primary {
+  color: #ffffff;
+}
+
+/* Planning: the hero ends, transition onto pure white with deliberate
+   breathing room before "Continue preparation" — and give that heading
+   real editorial weight, distinct from the smaller sub-headings used
+   elsewhere ("Other preparation", "Travel readiness"). */
+.hero-stack[data-state="planning"] .spec-section[data-section-id="prep-header"] .section-header {
+  margin-top: 0;
+  padding-top: 60px;
+  border-top: 1px solid var(--color-border);
+}
+
+.hero-stack[data-state="planning"] .spec-section[data-section-id="prep-header"] .section-header__title {
+  font-size: 0.85rem;
+  letter-spacing: 0.14em;
+}
+
+.hero-stack[data-state="planning"] .spec-section[data-section-id="prep-header"] .section-header__subtitle {
+  font-size: 1rem;
+}
+
+/* Ready: the hero ends, transition onto pure white with deliberate
+   breathing room before "Travel readiness". */
+.hero-stack[data-state="ready"] .spec-section[data-section-id="readiness-header"] .section-header {
+  margin-top: 0;
+  padding-top: 48px;
+  border-top: 1px solid var(--color-border);
+}
+
+/* Disruption: the hero ends, transition onto pure white before Flight —
+   matching the breathing-room pattern used elsewhere — plus clearance
+   below the Flight/Hotel row (which now contains the nested simulator)
+   so it never crowds "Find another flight" underneath it. */
+.hero-stack[data-state="disruption"] .spec-section[data-section-id="flight-detail"] .detail-card,
+.hero-stack[data-state="disruption"] .spec-section[data-section-id="hotel-detail"] .detail-card {
+  padding-top: 44px;
+  border-top: none;
+}
+
+.hero-stack[data-state="disruption"] .spec-section[data-section-id="flight-detail"],
+.hero-stack[data-state="disruption"] .spec-section[data-section-id="hotel-detail"] {
+  margin-bottom: var(--space-xxl);
+}
+
+/* ---------- Inline flight-status simulator (nested under flight-detail) ---------- */
+
+.flight-status-inline {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xs);
+  font-size: 0.62rem;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+}
+
+.flight-status-inline select {
+  padding: var(--space-xs) var(--space-md) var(--space-xs) var(--space-sm);
+  border-radius: 0;
+  font-family: var(--font-sans);
+  font-size: 0.7rem;
+  text-transform: none;
+  letter-spacing: normal;
+}
+
+/* Planning/Ready: over the photograph — white text, white 1px border,
+   transparent fill, quiet/secondary to the flight information */
+.spec-renderer[data-state="planning"] .flight-status-inline,
+.spec-renderer[data-state="ready"] .flight-status-inline {
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.spec-renderer[data-state="planning"] .flight-status-inline select,
+.spec-renderer[data-state="ready"] .flight-status-inline select {
+  border: 1px solid #ffffff;
+  color: #ffffff;
+  background: transparent;
+  color-scheme: dark;
+}
+
+.spec-renderer[data-state="planning"] .flight-status-inline select option,
+.spec-renderer[data-state="ready"] .flight-status-inline select option {
+  color: #ffffff;
+  background: #17191c;
+}
+
+/* Disruption: plain white background — black text, black 1px border,
+   native select, no shadow */
+.spec-renderer[data-state="disruption"] .flight-status-inline {
+  color: var(--color-ink-secondary);
+}
+
+.spec-renderer[data-state="disruption"] .flight-status-inline select {
+  border: 1px solid var(--color-ink);
+  color: var(--color-ink);
+  background: #ffffff;
+}
+
+/* Disruption: the cancelled flight's status line uses the restrained
+   recovery-red token — the one place besides the hero rule where red
+   communicates disruption. No schema change: this colors the whole
+   secondary line (which already reads "... · Cancelled"), since
+   DetailCard's props don't support styling a single word within it. */
+.spec-renderer[data-state="disruption"] .spec-section[data-section-id="flight-detail"] .detail-card__secondary {
+  color: var(--color-recover);
+}
+
+@media (max-width: 720px) {
+  .shell {
+    padding: var(--space-md) var(--space-lg);
+  }
+  .hero-stack[data-state="planning"] .spec-section[data-section-id="header"] {
+    min-height: 260px;
+  }
+  .hero-stack[data-state="ready"] .spec-section[data-section-id="header"] {
+    min-height: 200px;
+  }
+  /* Only the destination heading sits on the photograph at this width.
+     Flight and hotel stack below it, so their text and control stay legible. */
+  .hero-stack[data-state="planning"] .spec-section[data-section-id="flight-detail"],
+  .hero-stack[data-state="planning"] .spec-section[data-section-id="hotel-detail"],
+  .hero-stack[data-state="ready"] .spec-section[data-section-id="flight-detail"],
+  .hero-stack[data-state="ready"] .spec-section[data-section-id="hotel-detail"] {
+    min-height: 0;
+    padding-bottom: 0;
+    justify-content: flex-start;
+  }
+  .hero-stack[data-state="planning"] .spec-section[data-section-id="hotel-detail"],
+  .hero-stack[data-state="ready"] .spec-section[data-section-id="hotel-detail"] {
+    border-left: 0;
+  }
+  .hero-stack[data-state="planning"] .spec-section[data-section-id="flight-detail"] .detail-card,
+  .hero-stack[data-state="planning"] .spec-section[data-section-id="hotel-detail"] .detail-card,
+  .hero-stack[data-state="ready"] .spec-section[data-section-id="flight-detail"] .detail-card,
+  .hero-stack[data-state="ready"] .spec-section[data-section-id="hotel-detail"] .detail-card {
+    border-top-color: var(--color-border);
+  }
+  .hero-stack[data-state="planning"] .spec-section[data-component="DetailCard"] .detail-card__label,
+  .hero-stack[data-state="planning"] .spec-section[data-component="DetailCard"] .detail-card__secondary,
+  .hero-stack[data-state="ready"] .spec-section[data-component="DetailCard"] .detail-card__label,
+  .hero-stack[data-state="ready"] .spec-section[data-component="DetailCard"] .detail-card__secondary {
+    color: var(--color-ink-secondary);
+  }
+  .hero-stack[data-state="planning"] .spec-section[data-component="DetailCard"] .detail-card__primary,
+  .hero-stack[data-state="ready"] .spec-section[data-component="DetailCard"] .detail-card__primary {
+    color: var(--color-ink);
+  }
+  .spec-renderer[data-state="planning"] .flight-status-inline,
+  .spec-renderer[data-state="ready"] .flight-status-inline {
+    color: var(--color-ink-secondary);
+  }
+  .spec-renderer[data-state="planning"] .flight-status-inline select,
+  .spec-renderer[data-state="ready"] .flight-status-inline select {
+    border-color: var(--color-ink);
+    color: var(--color-ink);
+    background: #ffffff;
+    color-scheme: light;
+  }
+  .hero-stack[data-state="disruption"] .spec-section[data-section-id="disruption-banner"] {
+    min-height: 176px;
+  }
+}

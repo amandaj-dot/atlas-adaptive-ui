@@ -1,0 +1,70 @@
+.banner__title {
+  margin: 0 0 var(--space-xs) 0;
+}
+
+.banner__message {
+  margin: 0;
+}
+
+/*
+ * "info" tone: a single quiet line, no box, no fill.
+ */
+.banner--info {
+  padding: 0 0 var(--space-lg) 0;
+}
+
+.banner--info .banner__title {
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: var(--color-ink);
+}
+
+.banner--info .banner__message {
+  font-size: 0.85rem;
+  font-weight: 400;
+  color: var(--color-ink-secondary);
+  margin-top: 2px;
+}
+
+/*
+ * "alert" tone: Disruption's headline. Typography-led — a large,
+ * light-weight title and a restrained red rule on the left — not a
+ * filled panel. Dominance here comes from scale and position in the
+ * composition, not saturation.
+ */
+.banner--alert {
+  border-left: 2px solid var(--color-recover);
+  padding: var(--space-xs) 0 var(--space-sm) var(--space-lg);
+  margin-bottom: var(--space-sm);
+}
+
+.banner--alert .banner__title {
+  font-size: 2rem;
+  font-weight: 300;
+  letter-spacing: -0.005em;
+  color: var(--color-ink);
+}
+
+.banner--alert .banner__message {
+  margin-top: var(--space-sm);
+  font-size: 1rem;
+  font-weight: 400;
+  color: var(--color-ink-secondary);
+}
+
+/* "success" tone: same restrained, typography-led treatment */
+.banner--success {
+  border-left: 2px solid var(--color-ink);
+  padding: var(--space-xs) 0 var(--space-lg) var(--space-lg);
+  margin-bottom: var(--space-lg);
+}
+
+.banner--success .banner__title {
+  font-size: 1.1rem;
+  font-weight: 500;
+  color: var(--color-ink);
+}
+
+.banner--success .banner__message {
+  color: var(--color-ink-secondary);
+}

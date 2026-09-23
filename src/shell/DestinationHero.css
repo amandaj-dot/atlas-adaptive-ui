@@ -1,0 +1,70 @@
+.destination-hero {
+  position: relative;
+  width: 100%;
+  overflow: hidden;
+  transition: height 0.2s ease;
+}
+
+.destination-hero__image {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center 60%;
+  display: block;
+}
+
+/* Subtle black scrim, only where needed for WCAG-legible overlaid text —
+   no color effects, no heavy filters. */
+.destination-hero__scrim {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to bottom, transparent 25%, rgba(0, 0, 0, 0.62) 100%);
+  opacity: 0;
+}
+
+/*
+ * Full presence — Planning/Ready. Imagery is the strongest emotional
+ * element in these two states; the photograph functions as an
+ * information canvas (Planning composes flight details directly onto
+ * it), not a decorative banner.
+ */
+.destination-hero[data-state="planning"],
+.destination-hero[data-state="ready"] {
+  height: 500px;
+}
+
+.destination-hero[data-state="planning"] .destination-hero__scrim,
+.destination-hero[data-state="ready"] .destination-hero__scrim,
+.destination-hero[data-state="disruption"] .destination-hero__scrim {
+  opacity: 1;
+}
+
+/*
+ * Disruption: moderately reduced, not thin — enough presence to still
+ * carry the trip-context and cancellation message directly on the
+ * photograph (per this round's explicit brief), while staying
+ * meaningfully smaller than Planning/Ready's 500px, since recovery
+ * still takes precedence over full destination immersion. This is a
+ * deliberate revision of an earlier pass that kept Disruption at 88px —
+ * that was correct for that composition, this one asks for the
+ * cancellation message to live on the hero itself.
+ */
+.destination-hero[data-state="disruption"] {
+  height: 260px;
+}
+
+.destination-hero[data-state="disruption"] .destination-hero__image {
+  object-position: center 40%;
+}
+
+@media (max-width: 720px) {
+  .destination-hero[data-state="planning"],
+  .destination-hero[data-state="ready"] {
+    height: 260px;
+  }
+  .destination-hero[data-state="disruption"] {
+    height: 220px;
+  }
+}

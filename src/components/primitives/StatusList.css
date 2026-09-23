@@ -1,0 +1,55 @@
+.status-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+}
+
+.status-list__item {
+  display: flex;
+  align-items: baseline;
+  gap: var(--space-sm);
+  font-size: 0.9rem;
+  font-weight: 400;
+  color: var(--color-ink);
+}
+
+/*
+ * Restrained mark instead of a colored dot — a checkmark for complete,
+ * a plain dash otherwise. No green, no red; status is communicated by
+ * the glyph itself, not by saturated color.
+ */
+.status-list__dot {
+  width: 14px;
+  flex-shrink: 0;
+  font-size: 0.75rem;
+  color: var(--color-ink-secondary);
+}
+
+.status-list__dot--complete::before {
+  content: "✓";
+  color: var(--color-ink);
+}
+
+.status-list__dot--incomplete::before {
+  content: "–";
+}
+
+.status-list__dot--urgent::before {
+  content: "–";
+  color: var(--color-recover);
+}
+
+/*
+ * "Trip essentials"-style clustering isn't used anywhere currently, but
+ * deprioritized/quiet variants (Disruption's routine prep, Ready's
+ * completed checklist) stay smaller and muted — already restrained by
+ * default; these just reduce size further where called for.
+ */
+.spec-section[data-section-id="deprioritized-prep"] .status-list__item,
+.spec-section[data-section-id="prep-confirmation"] .status-list__item {
+  color: var(--color-ink-secondary);
+  font-size: 0.85rem;
+}

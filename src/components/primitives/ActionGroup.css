@@ -1,0 +1,51 @@
+/*
+ * One simple rectangular primary control, everything else a quiet text
+ * link with an arrow — no pills, no filled color-coded buttons. The
+ * palette is constant (ink/white) across every state now; there is no
+ * per-intent color scheme, consistent with the black/white/gray
+ * direction.
+ */
+.action-group {
+  display: flex;
+  align-items: center;
+  gap: var(--space-xl);
+  flex-wrap: wrap;
+  margin: var(--space-sm) 0 var(--space-xs) 0;
+}
+
+.action-group__button {
+  font-family: var(--font-sans);
+  cursor: pointer;
+  border: none;
+  background: none;
+}
+
+.action-group__button--primary {
+  font-size: 0.8rem;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  padding: var(--space-md) var(--space-xl);
+  border: 1px solid var(--color-ink);
+  border-radius: 0;
+  background: var(--color-ink);
+  color: var(--color-surface);
+}
+
+.action-group__button--secondary {
+  font-size: 0.78rem;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--color-ink);
+  background: #FFFFFF;
+  border: 1px solid var(--color-ink);
+  border-radius: 0;
+  padding: 16px 32px;
+  transition: background-color 0.15s ease, color 0.15s ease;
+}
+
+.action-group__button--secondary:hover {
+  background: var(--color-ink);
+  color: #FFFFFF;
+}

@@ -1,0 +1,56 @@
+.control-panel {
+  padding: 0;
+}
+
+.control-panel__heading {
+  margin: 0 0 var(--space-md) 0;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  font-size: 0.7rem;
+  font-family: var(--font-mono);
+  color: var(--color-ink-muted);
+}
+
+.control-panel__row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-md);
+  padding: var(--space-sm) 0;
+  border-top: 1px solid var(--color-border);
+  font-size: 0.85rem;
+}
+
+.control-panel__row:first-of-type {
+  border-top: none;
+}
+
+.control-panel__row input[type="number"] {
+  width: 64px;
+  padding: var(--space-xs);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  font-family: var(--font-sans);
+}
+
+.control-panel__row input[type="checkbox"] {
+  width: 18px;
+  height: 18px;
+}
+
+.control-panel__row select {
+  padding: var(--space-xs) var(--space-sm);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  font-family: var(--font-sans);
+  font-size: 0.85rem;
+  background: var(--color-surface);
+}
+
+.control-panel__flight-status {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  gap: var(--space-md);
+}

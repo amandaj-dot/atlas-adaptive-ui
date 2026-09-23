@@ -1,0 +1,40 @@
+.governance-test {
+  padding: var(--space-md) 0;
+  border-top: 1px solid var(--color-border);
+}
+
+.governance-test__label {
+  margin: 0 0 var(--space-xs);
+  font-family: var(--font-mono);
+  font-size: 0.65rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.governance-test__description,
+.governance-test__response {
+  margin: 0 0 var(--space-sm);
+  font-size: 0.75rem;
+  line-height: 1.45;
+}
+
+.governance-test__description { color: var(--color-ink-muted); }
+
+.governance-test button {
+  padding: 0.55rem 0.7rem;
+  border: 1px solid var(--color-ink);
+  border-radius: 0;
+  background: var(--color-ink);
+  color: white;
+  font-family: var(--font-mono);
+  font-size: 0.65rem;
+  text-transform: uppercase;
+  cursor: pointer;
+}
+
+.governance-test__response {
+  margin: var(--space-sm) 0 0;
+  padding: var(--space-sm);
+  border-left: 2px solid var(--color-recover);
+  background: white;
+}

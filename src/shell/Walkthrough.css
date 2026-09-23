@@ -1,0 +1,74 @@
+.walkthrough__spotlight {
+  position: fixed;
+  z-index: 390;
+  pointer-events: none;
+  border: 2px solid #ffffff;
+  box-shadow: 0 0 0 2px #111111, 0 0 0 9999px rgba(0, 0, 0, 0.54);
+  transition: top 0.16s ease, left 0.16s ease, width 0.16s ease, height 0.16s ease;
+}
+
+.walkthrough__card {
+  position: fixed;
+  right: 1rem;
+  z-index: 400;
+  width: min(350px, calc(100vw - 2rem));
+  padding: 1.25rem;
+  color: #17191c;
+  background: #ffffff;
+  border: 1px solid #17191c;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.22);
+}
+
+.walkthrough__card--top { top: 1rem; }
+.walkthrough__card--bottom { bottom: 1rem; }
+.walkthrough__card--inspector { left: 1rem; right: auto; }
+
+.walkthrough__eyebrow {
+  font-family: var(--font-mono);
+  font-size: 0.65rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--color-ink-muted);
+}
+
+.walkthrough__card h2 {
+  margin: 0.6rem 0 0.35rem;
+  font-size: 1.25rem;
+  font-weight: 500;
+}
+
+.walkthrough__card p {
+  margin: 0 0 1.15rem;
+  font-size: 0.84rem;
+  line-height: 1.5;
+}
+
+.walkthrough__controls,
+.walkthrough__navigation {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.walkthrough__controls { justify-content: space-between; }
+
+.walkthrough__controls button {
+  font-family: var(--font-mono);
+  font-size: 0.66rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  padding: 0.55rem 0.65rem;
+  border: 1px solid #17191c;
+  border-radius: 0;
+  background: #ffffff;
+  color: #17191c;
+  cursor: pointer;
+}
+
+.walkthrough__controls button:disabled { opacity: 0.4; cursor: default; }
+.walkthrough__controls .walkthrough__skip { border: 0; text-decoration: underline; padding-left: 0; }
+.walkthrough__controls .walkthrough__next { background: #17191c; color: #ffffff; }
+
+@media (max-width: 720px) {
+  .walkthrough__card { left: 1rem; right: 1rem; width: auto; }
+}
