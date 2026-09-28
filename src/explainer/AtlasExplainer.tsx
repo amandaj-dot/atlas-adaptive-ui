@@ -2,24 +2,25 @@ import { useEffect, useRef, useState } from "react";
 import { deriveInterfaceSpec } from "../rules/rulesEngine";
 import type { TravelContext } from "../rules/context";
 import type { InterfaceSpec } from "../spec/interfaceSpec.types";
+import { validateInterfaceSpec } from "../spec/interfaceSpec.schema";
+import { componentRegistry } from "../components/registry/componentRegistry";
 import { SpecRenderer } from "../render/SpecRenderer";
 import { DestinationHero } from "../shell/DestinationHero";
-import { DecisionInspector } from "../inspector/DecisionInspector";
-import { SystemInspector } from "../devtools/SystemInspector";
 import { GovernanceTest } from "../devtools/GovernanceTest";
 import { InterpretationDebugView } from "../devtools/InterpretationDebugView";
 import { runPredefinedGovernanceTest } from "../llm/governanceDemo";
 import type { InterpretationResult } from "../llm/interpretContext";
 import "../tokens/tokens.css";
-import "../App.css";
 import "./AtlasExplainer.css";
 
-type SceneId = "planning" | "prep-complete" | "ready" | "flight-cancelled" | "disruption" | "inspector" | "governance" | "summary";
+type Phase = "context" | "rules" | "spec" | "validation" | "registry" | "interface";
+type SceneId = "context" | "rules" | "spec" | "validation" | "registry" | "currency" | "ready" | "flight" | "disruption" | "governance" | "summary";
 type Scene = {
   id: SceneId;
   duration: number;
-  context: TravelContext;
-  shownContext: TravelContext;
+  phase: Phase;
+  input: TravelContext;
+  rendered: TravelContext;
   heading: string;
   explanation: string;
   change?: "currency" | "flight";
@@ -35,20 +36,93 @@ const planning: TravelContext = {
 const ready: TravelContext = { ...planning, currencyPrepComplete: true };
 const disruption: TravelContext = { ...ready, flightStatus: "cancelled" };
 
-// One timeline controls every scene and its dwell time. Total: 28.4 seconds.
+// One timeline controls every scene and its dwell time. Total: 29.8 seconds.
 const scenes: Scene[] = [
-  { id: "planning", duration: 4200, context: planning, shownContext: planning, heading: "Preparing for your trip", explanation: "One preparation task is still open, so Atlas keeps it in focus." },
-  { id: "prep-complete", duration: 2200, context: planning, shownContext: ready, heading: "One signal changes", explanation: "Currency preparation is complete. Atlas evaluates the rules again.", change: "currency" },
-  { id: "ready", duration: 4000, context: ready, shownContext: ready, heading: "Ready to go", explanation: "With all preparation complete, trip details and the next action come forward." },
-  { id: "flight-cancelled", duration: 2200, context: ready, shownContext: disruption, heading: "Travel plans changed", explanation: "The flight is cancelled. Atlas evaluates the rules again.", change: "flight" },
-  { id: "disruption", duration: 4100, context: disruption, shownContext: disruption, heading: "Recovery takes priority", explanation: "Preparation stays complete while recovery actions move to the front." },
-  { id: "inspector", duration: 3900, context: disruption, shownContext: disruption, heading: "The decision is inspectable", explanation: "Flight cancellation triggered Disruption and changed the intent to recovery." },
-  { id: "governance", duration: 4500, context: disruption, shownContext: disruption, heading: "Adaptation has boundaries", explanation: "An unsupported AirportMap request is blocked. The last valid interface stays in place." },
-  { id: "summary", duration: 3300, context: disruption, shownContext: disruption, heading: "Context → Rules → Governed Interface", explanation: "Atlas adapts to changing context without giving the system unlimited freedom." },
+  { id: "context", duration: 3100, phase: "context", input: planning, rendered: planning, heading: "The context is structured data", explanation: "Atlas knows the departure timing, preparation progress, and flight status." },
+  { id: "rules", duration: 2900, phase: "rules", input: planning, rendered: planning, heading: "Rules interpret those signals", explanation: "The flight is confirmed, but currency is incomplete. Planning remains the priority." },
+  { id: "spec", duration: 2900, phase: "spec", input: planning, rendered: planning, heading: "Rules produce interface instructions", explanation: "An InterfaceSpec names the state, intent, sections, and their order." },
+  { id: "validation", duration: 2600, phase: "validation", input: planning, rendered: planning, heading: "The specification is checked", explanation: "Zod validates its structure and each section’s props before rendering." },
+  { id: "registry", duration: 2600, phase: "registry", input: planning, rendered: planning, heading: "Approved components assemble the view", explanation: "The renderer resolves each valid section through Atlas’s fixed component registry." },
+  { id: "currency", duration: 1900, phase: "context", input: ready, rendered: planning, heading: "One context value changes", explanation: "Currency becomes complete. Atlas runs the same rules again before replacing the view.", change: "currency" },
+  { id: "ready", duration: 2800, phase: "interface", input: ready, rendered: ready, heading: "A new specification changes the interface", explanation: "All preparation is complete, so the spec prioritizes trip details and the next action." },
+  { id: "flight", duration: 1900, phase: "context", input: disruption, rendered: ready, heading: "The flight status changes", explanation: "The cancellation enters the same context object. The current view holds while rules run.", change: "flight" },
+  { id: "disruption", duration: 3100, phase: "interface", input: disruption, rendered: disruption, heading: "Recovery becomes the priority", explanation: "The cancellation rule wins. A new spec promotes recovery and preserves completed prep." },
+  { id: "governance", duration: 3500, phase: "registry", input: disruption, rendered: disruption, heading: "The boundary is enforced", explanation: "AirportMap is outside the registry, so the request is blocked and the valid interface remains." },
+  { id: "summary", duration: 2500, phase: "interface", input: disruption, rendered: disruption, heading: "Context becomes a governed interface", explanation: "Inputs change → rules decide → a validated spec selects approved components → the interface adapts." },
+];
+
+const phases: Array<{ id: Phase; label: string }> = [
+  { id: "context", label: "Context" }, { id: "rules", label: "Rules" },
+  { id: "spec", label: "InterfaceSpec" }, { id: "validation", label: "Validation" },
+  { id: "registry", label: "Registry" }, { id: "interface", label: "Interface" },
 ];
 
 function subset(spec: InterfaceSpec, ids: string[]): InterfaceSpec {
   return { ...spec, sections: spec.sections.filter((section) => ids.includes(section.id)) };
+}
+
+function TransformationDetail({ scene, spec, result, onRun }: {
+  scene: Scene;
+  spec: InterfaceSpec;
+  result: InterpretationResult | null;
+  onRun: () => void;
+}) {
+  if (scene.id === "governance") return <div className="atlas-explainer__governance">
+    <GovernanceTest onRun={onRun} result={result} />
+    <InterpretationDebugView result={result} />
+  </div>;
+
+  if (scene.phase === "context") return <>
+    <p className="atlas-explainer__detail-label">TravelContext</p>
+    <dl className="atlas-explainer__data-list">
+      <div><dt>daysUntilTrip</dt><dd>{scene.input.daysUntilTrip}</dd></div>
+      <div><dt>travelNoticeComplete</dt><dd>{String(scene.input.travelNoticeComplete)}</dd></div>
+      <div><dt>cardReadinessComplete</dt><dd>{String(scene.input.cardReadinessComplete)}</dd></div>
+      <div className={scene.change === "currency" ? "atlas-explainer__changed" : ""}><dt>currencyPrepComplete</dt><dd>{String(scene.input.currencyPrepComplete)}</dd></div>
+      <div className={scene.change === "flight" ? "atlas-explainer__changed" : ""}><dt>flightStatus</dt><dd>"{scene.input.flightStatus}"</dd></div>
+    </dl>
+    {scene.change && <p className="atlas-explainer__detail-note">Changed input → rules run again → new interface specification. The last valid view stays visible until then.</p>}
+  </>;
+
+  if (scene.phase === "rules") return <>
+    <p className="atlas-explainer__detail-label">Rule priority</p>
+    <ol className="atlas-explainer__data-list atlas-explainer__rule-list">
+      <li><span>Flight cancelled?</span><strong>No</strong></li>
+      <li><span>All prep complete?</span><strong>No</strong></li>
+      <li className="atlas-explainer__rule-active"><span>Otherwise</span><strong>Planning</strong></li>
+    </ol>
+    <p className="atlas-explainer__detail-note">Rules evaluate the values in context and decide what matters next.</p>
+  </>;
+
+  if (scene.phase === "spec" || scene.phase === "interface") return <>
+    <p className="atlas-explainer__detail-label">Derived InterfaceSpec</p>
+    {scene.phase === "interface" && <p className="atlas-explainer__rule-result">{spec.state === "ready" ? "All three prep fields are true → Ready" : "flightStatus is cancelled → Disruption takes priority"}</p>}
+    <dl className="atlas-explainer__data-list"><div><dt>state</dt><dd>{spec.state}</dd></div><div><dt>intent</dt><dd>{spec.intent}</dd></div></dl>
+    <p className="atlas-explainer__detail-label">Sections, in priority order</p>
+    <ol className="atlas-explainer__data-list atlas-explainer__section-list">
+      {spec.sections.slice(0, 7).map((section) => <li key={section.id}><span>{section.id}</span><strong>{section.component}</strong></li>)}
+    </ol>
+    <p className="atlas-explainer__detail-note">The renderer uses these instructions to compose the interface shown beside them.</p>
+  </>;
+
+  if (scene.phase === "validation") {
+    const check = validateInterfaceSpec(spec);
+    return <>
+      <p className="atlas-explainer__detail-label">Zod validation</p>
+      <div className="atlas-explainer__check"><span>InterfaceSpec structure</span><strong>{check.valid ? "Passed ✓" : "Blocked"}</strong></div>
+      <div className="atlas-explainer__check"><span>Props for every section</span><strong>{check.valid ? "Passed ✓" : "Blocked"}</strong></div>
+      <p className="atlas-explainer__detail-note">Invalid state, section name, or component props cannot pass as a valid spec.</p>
+    </>;
+  }
+
+  const names = [...new Set(spec.sections.map((section) => section.component))];
+  return <>
+    <p className="atlas-explainer__detail-label">Approved component registry</p>
+    <ul className="atlas-explainer__data-list atlas-explainer__component-list">
+      {names.map((name) => <li key={name}><span>{name}</span><strong>{name in componentRegistry ? "Approved ✓" : "Blocked"}</strong></li>)}
+    </ul>
+    <p className="atlas-explainer__detail-note">The renderer looks up each component and fills it with the validated section content.</p>
+  </>;
 }
 
 export function AtlasExplainer() {
@@ -56,13 +130,10 @@ export function AtlasExplainer() {
   const [paused, setPaused] = useState(false);
   const [finished, setFinished] = useState(false);
   const [result, setResult] = useState<InterpretationResult | null>(null);
-  const [closedScene, setClosedScene] = useState<SceneId | null>(null);
   const remaining = useRef(scenes[0].duration);
-  const drawerRef = useRef<HTMLDivElement>(null);
   const scene = scenes[sceneIndex];
-  const spec = deriveInterfaceSpec(scene.context);
-  const showInspector = scene.id === "inspector" || scene.id === "governance";
-  const inspectorOpen = showInspector && closedScene !== scene.id;
+  const inputSpec = deriveInterfaceSpec(scene.input);
+  const spec = deriveInterfaceSpec(scene.rendered);
   const governanceResult = scene.id === "governance" ? result : null;
 
   useEffect(() => {
@@ -92,14 +163,6 @@ export function AtlasExplainer() {
     return () => window.clearInterval(timer);
   }, [sceneIndex, paused, finished]);
 
-  useEffect(() => {
-    if (!showInspector) return;
-    const drawer = drawerRef.current;
-    const body = drawer?.querySelector<HTMLElement>(".system-inspector-drawer__body");
-    const target = drawer?.querySelector<HTMLElement>(scene.id === "governance" ? '[data-walkthrough-target="governance-result"]' : '[data-walkthrough-target="decision-trace"]');
-    if (body && target) body.scrollTop = Math.max(0, target.offsetTop - body.offsetTop - 12);
-  }, [scene.id, showInspector, result]);
-
   function replay() {
     remaining.current = scenes[0].duration;
     setSceneIndex(0);
@@ -120,43 +183,36 @@ export function AtlasExplainer() {
       <header className="atlas-explainer__header">
         <div>
           <p className="atlas-explainer__eyebrow">Atlas / Adaptive travel</p>
-          <h1>How Atlas adapts</h1>
+          <h1>How context becomes an interface</h1>
         </div>
         <a href="/" className="atlas-explainer__prototype-link">Explore the prototype ↗</a>
       </header>
 
       <div className="atlas-explainer__stage">
+        <ol className="atlas-explainer__pipeline" aria-label="Atlas interface pipeline">
+          {phases.map((phase, index) => <li key={phase.id} className={scene.phase === phase.id ? "atlas-explainer__pipeline-active" : ""} aria-current={scene.phase === phase.id ? "step" : undefined}><span>{String(index + 1).padStart(2, "0")}</span>{phase.label}</li>)}
+        </ol>
         {scene.id === "summary" ? (
           <section className="atlas-explainer__summary" aria-live="polite">
-            <p className="atlas-explainer__eyebrow">The system in one line</p>
+            <p className="atlas-explainer__eyebrow">The transformation</p>
             <h2>{scene.heading}</h2>
             <p>{scene.explanation}</p>
-            <div className="atlas-explainer__summary-flow" aria-label="Travel context leads to evaluated rules, validated interface specification, approved components, and the rendered interface">
-              <span>TravelContext</span><b>→</b><span>Rules</span><b>→</b><span>InterfaceSpec</span><b>→</b><span>Validation</span><b>→</b><span>Component registry</span><b>→</b><span>Interface</span>
-            </div>
+            <p className="atlas-explainer__summary-secondary">A changed signal reruns the same pipeline. Unsupported capabilities are stopped before rendering.</p>
           </section>
         ) : (
           <div className="atlas-explainer__composition">
-            <aside className="atlas-explainer__context" aria-label="Travel context">
-              <p className="atlas-explainer__eyebrow">Structured context</p>
-              <dl>
-                <div><dt>Days until trip</dt><dd>24</dd></div>
-                <div><dt>Travel notice</dt><dd>Complete</dd></div>
-                <div><dt>Card readiness</dt><dd>Complete</dd></div>
-                <div className={scene.change === "currency" ? "atlas-explainer__changed" : ""}><dt>Currency</dt><dd>{scene.shownContext.currencyPrepComplete ? "Complete" : "Incomplete"}</dd></div>
-                <div className={scene.change === "flight" ? "atlas-explainer__changed" : ""}><dt>Flight status</dt><dd>{scene.shownContext.flightStatus === "cancelled" ? "Cancelled" : "Confirmed"}</dd></div>
-              </dl>
-              <div className="atlas-explainer__derived">
-                <span>Derived state</span>
-                <strong>{scene.change ? "Evaluating…" : spec.state.toUpperCase()}</strong>
+            <section className="atlas-explainer__transformation" aria-label="Current transformation step" aria-live="polite">
+              <p className="atlas-explainer__eyebrow">{scene.id === "governance" ? "Governance boundary" : `Step ${phases.findIndex((phase) => phase.id === scene.phase) + 1} / 6`}</p>
+              <h2>{scene.heading}</h2>
+              <p className="atlas-explainer__transformation-copy">{scene.explanation}</p>
+              <div className="atlas-explainer__detail" key={scene.id}>
+                <TransformationDetail scene={scene} spec={inputSpec} result={governanceResult} onRun={() => { runPredefinedGovernanceTest().then(setResult); }} />
               </div>
-              {scene.change && <p className="atlas-explainer__causal">Context changed <span>→</span> rules re-evaluated</p>}
-              {(scene.id === "inspector" || scene.id === "governance") && <p className="atlas-explainer__path">TravelContext → rules → InterfaceSpec → validation → component registry → interface</p>}
-            </aside>
+            </section>
 
             <section className="atlas-explainer__product" aria-label={`${spec.state} interface preview`}>
-              <div className="atlas-explainer__product-heading"><span>Atlas prototype</span><span>{spec.state}</span></div>
-              <div className="atlas-explainer__product-canvas" ref={drawerRef}>
+              <div className="atlas-explainer__product-heading"><span>{scene.change ? "Previous valid interface" : "Rendered Atlas interface"}</span><strong>{spec.state}</strong></div>
+              <div className="atlas-explainer__product-canvas">
                 <div className="atlas-explainer__product-scroll" key={spec.state}>
                   <div className="atlas-explainer__hero">
                     <DestinationHero state={spec.state} />
@@ -164,15 +220,6 @@ export function AtlasExplainer() {
                   </div>
                   <div className="atlas-explainer__product-body"><SpecRenderer spec={bodySpec} /></div>
                 </div>
-                <SystemInspector
-                  isOpen={inspectorOpen}
-                  onOpenChange={(open) => setClosedScene(open ? null : scene.id)}
-                  contextControls={<dl className="atlas-explainer__inspector-context"><div><dt>Flight status</dt><dd>{scene.context.flightStatus}</dd></div><div><dt>Preparation</dt><dd>3 of 3 complete</dd></div></dl>}
-                  decisionTrace={<DecisionInspector spec={spec} />}
-                  naturalLanguageInput={null}
-                  interpretationDebug={<InterpretationDebugView result={governanceResult} />}
-                  governanceTest={<GovernanceTest onRun={() => { runPredefinedGovernanceTest().then(setResult); }} result={governanceResult} />}
-                />
               </div>
             </section>
           </div>
@@ -180,10 +227,7 @@ export function AtlasExplainer() {
       </div>
 
       <footer className="atlas-explainer__footer">
-        <div className="atlas-explainer__narration" aria-live="polite" key={scene.id}>
-          <span className="atlas-explainer__eyebrow">{String(sceneIndex + 1).padStart(2, "0")} / {String(scenes.length).padStart(2, "0")}</span>
-          {scene.id !== "summary" && <><h2>{scene.heading}</h2><p>{scene.explanation}</p></>}
-        </div>
+        <p className="atlas-explainer__counter">{String(sceneIndex + 1).padStart(2, "0")} / {String(scenes.length).padStart(2, "0")}</p>
         <div className="atlas-explainer__controls">
           <button type="button" onClick={replay}>Replay</button>
           <button type="button" onClick={() => setPaused((value) => !value)} disabled={finished}>{paused ? "Play" : "Pause"}</button>
