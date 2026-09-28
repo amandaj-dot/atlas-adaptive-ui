@@ -2,6 +2,8 @@
 
 [Live prototype](https://atlas-ecru-one.vercel.app/)
 
+[30-second explainer](https://atlas-ecru-one.vercel.app/explainer)
+
 Atlas is a rules-driven adaptive UI prototype for a travel scenario. Completing three preparation tasks moves the experience from Planning to Ready. Setting the flight status to Cancelled moves it to Disruption and brings recovery actions forward. The flight selector simulates a context change; it does not connect to an airline feed.
 
 ## How it works

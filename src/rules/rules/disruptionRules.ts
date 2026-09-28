@@ -31,7 +31,7 @@ export function buildDisruptionSpec(context: TravelContext): DisruptionResult {
 
   trace.push({
     rule: "intent-change",
-    reason: 'flightStatus="cancelled" → intent changed from "prepare" to "recover"',
+    reason: 'flightStatus="cancelled" → recovery takes priority → intent="recover"',
   });
 
   // Trip context + the cancellation message live ON the (modest, ~260px)

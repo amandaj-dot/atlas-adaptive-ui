@@ -26,7 +26,7 @@ function determineState(context: TravelContext): {
       state: "disruption",
       trace: {
         rule: "detect-disruption",
-        reason: 'flightStatus="cancelled" → disruption rule fired → state changed from "planning" to "disruption" (takes precedence over ready)',
+        reason: 'flightStatus="cancelled" → disruption rule fired → state="disruption" (takes precedence over ready)',
       },
     };
   }

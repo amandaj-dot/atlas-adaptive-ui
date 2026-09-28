@@ -11,6 +11,7 @@ import { InterpretationDebugView } from "./devtools/InterpretationDebugView";
 import { SystemInspector } from "./devtools/SystemInspector";
 import { GovernanceTest } from "./devtools/GovernanceTest";
 import { interpretContext, type InterpretationResult } from "./llm/interpretContext";
+import { runPredefinedGovernanceTest } from "./llm/governanceDemo";
 import { realAnthropicProvider } from "./llm/realAnthropicProvider";
 import { DestinationHero } from "./shell/DestinationHero";
 import { DemoActionPanel } from "./shell/DemoActionPanel";
@@ -19,7 +20,6 @@ import type { ActionId } from "./components/registry/schemas";
 import "./tokens/tokens.css";
 import "./App.css";
 
-const GOVERNANCE_REQUEST = "Show me an interactive map of nearby airports with alternative flight options.";
 const contextNames: Record<keyof TravelContext, string> = {
   daysUntilTrip: "Trip timing",
   flightStatus: "Flight status",
@@ -145,9 +145,7 @@ function App() {
 
   async function runGovernanceTest() {
     // The predefined candidate uses the same registry check as any interpreted request.
-    const result = await interpretContext(GOVERNANCE_REQUEST, async () => ({
-      kind: "capability_request", capability: "AirportMap",
-    }));
+    const result = await runPredefinedGovernanceTest();
     setInterpretation(result);
   }
 
